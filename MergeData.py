@@ -141,7 +141,8 @@ class MergeData():
                            'comments_per_post_mean',
                            'average_comment_character_count', 
                            'average_post_character_count',
-                           'average_subscriber_count'] 
+                           'average_subscriber_count',
+                           'media_embed_count'] 
         
         for col in log_cols:
             df[col] = log(df[col])
@@ -306,8 +307,8 @@ def main():
     input_path = "../Data/Input/Processed/"
     
     rescale_data=True
-    use_pca=True
-    whiten=True
+    use_pca=False
+    whiten=False
     
     outfile = "../Data/Output/"+generate_output_filename(use_pca=use_pca,
                                                          whiten=whiten,
