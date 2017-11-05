@@ -33,8 +33,10 @@ class FileInfo():
                           "AverageURLs.txt":"average_num_urls",
                           "CommentsPerPost.txt":"comments_per_post_mean",
                           "CommentEntropy.txt":"comment_entropy",
+                          "ContributorCommentRatio.txt":"contributor_comment_ratio_mean",
                           "CountComments.txt":"comment_count",
                           "CountContributors.txt":"contributor_count",
+                          "CountMediaEmbeds.txt":"media_embed_count",
                           "CountPosts.txt":"post_count",
                           "LanguageComplexity.txt":"flesch_kincaid",
                           "PostEntropy.txt":"post_entropy",
@@ -43,7 +45,7 @@ class FileInfo():
         
         self.check_cols = {"PostType.txt":["num_null_posts","pc_null_posts"]}
         
-        self.is_csv = ["CommentsPerPost.txt"]
+        self.is_csv = ["CommentsPerPost.txt", "ContributorCommentRatio.txt"]
 
 class CleanData():
     def __init__(self, inpath, outpath, files=None):
@@ -180,7 +182,7 @@ def main():
     processed_path = "../Data/Input/Processed/"
     
     cd = CleanData(raw_path, processed_path, 
-                   files=["AverageNsfwPosts.txt"])
+                   files=["CountMediaEmbeds.txt"])
     cd.remove_columns_and_write_files()    
     
 if __name__ == '__main__':
