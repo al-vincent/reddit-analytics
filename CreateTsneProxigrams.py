@@ -197,7 +197,7 @@ def main(testing=False, use_tsne_file=False):
     scatterplots, as required.
     """    
     # input files
-    f_in = "../Data/Output/MergedData_noPCA_Rescaled.txt"
+    f_in = "../Data/Output/1509876761_MergedData_noPCA_Rescaled.txt"
     f_tsne = "../Data/Output/MATLAB/MergedData_noPCA_Rescaled_p30_tSNE.csv"
     
     # get datasets
@@ -211,6 +211,7 @@ def main(testing=False, use_tsne_file=False):
     if use_tsne_file: # to run from file
         tsne = get_tsne(f_tsne=f_tsne, df=None, names=None) 
     else: # to generate sklearn tSNE
+        print("NOTE: Using scikit-learn tSNE")
         tsne = get_tsne(f_tsne=None, df=df, names=names, perplex=30) 
     
     # If testing=true, the program can be run with a small dataset of n lines
