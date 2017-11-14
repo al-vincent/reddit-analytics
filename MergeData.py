@@ -285,7 +285,7 @@ def generate_output_filename(use_pca=True, whiten=True, rescale=True):
         else:
             base += "_notWhitened"
     else:
-        base += "_noPCA"
+        base += "_noPCA_notWhitened"
     
     if rescale:
         base += "_Rescaled"
@@ -295,35 +295,72 @@ def generate_output_filename(use_pca=True, whiten=True, rescale=True):
     base += ".txt"
     
     return base
+
+def run_once(inpath, outpath, parameter_thresholds, rescale_data, use_pca, 
+             whiten, plot_dists, write_file):
+    """
+    Driver function that merges the files once; i.e. creates an output 
+    filename, creates a MergeData() object and merge the input files (with 
+    options to rescale, plot attribute distributions and write the output to 
+    file).
+    
+    Parameters:
+        - inpath: string, directory where input data is stored
+        - outpath: string, directory where merged output data will be saved
+        - parameter_thresholds: dict, holds minimum values for comment_count 
+            and post_count (i.e. only subreddits with more comments than 
+            comment_count AND more posts than post_count will be retained)
+        - rescale_data: boolean, flag to indicate whether to use log rescaling
+        - use_pca: boolean, flag to indicate whether or not to apply principal
+            components analysis
+        - whiten: boolean, flag to indicate whether or not to whiten the data 
+            (only used if PCA is also applied)
+        - plot_dists: boolean, flag to indicate whether or not to plot the 
+            attribute distributions 
+        - write_file: boolean, flag to indicate whether or not to write the 
+            merged data to file
+    """
+    
+    # set the name of the output foile
+    outfile = outpath + generate_output_filename(use_pca=use_pca,
+                                                 whiten=whiten,
+                                                 rescale=rescale_data)
+    # create a MergeData object
+    md = MergeData(inpath, outfile)
+    
+    # merge the input files
+    md.merge_data(thresholds=parameter_thresholds, 
+                  rescale=rescale_data,
+                  use_pca=use_pca,
+                  pca_whiten=whiten,
+                  plot_dists=plot_dists,
+                  write_file=write_file)
+    
+def run_many():
+    pass
     
 ## ****************************************************************************
 ## * MAIN METHOD
 ## ****************************************************************************
 def main():
     """
-    Main driver for program. Set filenames and parameters, then call MergeData.
+    Main driver for program. Set filenames and parameters, then call driver 
+    function (either run_once() or run_many()).
     """
     
     input_path = "../Data/Input/Processed/"
-    
-    rescale_data=True
-    use_pca=False
-    whiten=False
-    
-    outfile = "../Data/Output/"+generate_output_filename(use_pca=use_pca,
-                                                         whiten=whiten,
-                                                         rescale=rescale_data)
-    
+    output_path = "../Data/Output/"
+
     parameter_thresholds = {'comment_count':100000, 'post_count':1000}
-    
-    md = MergeData(input_path, outfile)
-    
-    md.merge_data(thresholds=parameter_thresholds, 
-                  rescale=rescale_data,
-                  use_pca=use_pca,
-                  pca_whiten=whiten,
-                  plot_dists=True,
-                  write_file=True)
+
+    run_once(input_path, 
+             output_path, 
+             parameter_thresholds=parameter_thresholds,
+             rescale_data=True, 
+             use_pca=False, 
+             whiten=False,
+             plot_dists=False,
+             write_file=True)
     
 if __name__ == '__main__':
     main()
