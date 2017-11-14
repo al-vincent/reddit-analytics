@@ -336,8 +336,38 @@ def run_once(inpath, outpath, parameter_thresholds, rescale_data, use_pca,
                   plot_dists=plot_dists,
                   write_file=write_file)
     
-def run_many():
-    pass
+def run_many(inpath, outpath, parameter_thresholds, scaling_settings,
+             plot_dists=False, write_file=True):
+    """
+    Run the data merge multiple times with different scaling settings; i.e. 
+    with or without log scaling, pca and whitening.
+    
+    Parameters:
+        - inpath: string, directory where input data is stored
+        - outpath: string, directory where merged output data will be saved
+        - parameter_thresholds: dict, holds minimum values for comment_count 
+            and post_count (i.e. only subreddits with more comments than 
+            comment_count AND more posts than post_count will be retained)
+        - scaling_settings: list of dicts, in format
+        [{"rescale":<boolean>, "pca":<boolean>, "whiten":<boolean>},
+         {"rescale":<boolean>, "pca":<boolean>, "whiten":<boolean>},
+         ...etc.]
+        - plot_dists: boolean, flag to indicate whether or not to plot the 
+            attribute distributions 
+        - write_file: boolean, flag to indicate whether or not to write the 
+            merged data to file
+    """
+        
+    for settings in scaling_settings:
+        run_once(inpath, 
+                 outpath, 
+                 parameter_thresholds=parameter_thresholds,
+                 rescale_data=settings["rescale"], 
+                 use_pca=settings["pca"], 
+                 whiten=settings["whiten"],
+                 plot_dists=plot_dists,
+                 write_file=write_file)
+                
     
 ## ****************************************************************************
 ## * MAIN METHOD
@@ -351,16 +381,32 @@ def main():
     input_path = "../Data/Input/Processed/"
     output_path = "../Data/Output/"
 
-    parameter_thresholds = {'comment_count':100000, 'post_count':1000}
+    parameter_thresholds = {'comment_count':100000, 'post_count':1000}    
 
-    run_once(input_path, 
-             output_path, 
+## The settings below will run the file merge once
+# =============================================================================
+#     run_once(inpath=input_path, 
+#              outpath=output_path, 
+#              parameter_thresholds=parameter_thresholds,
+#              rescale_data=True, 
+#              use_pca=False, 
+#              whiten=False,
+#              plot_dists=False,
+#              write_file=True)
+# =============================================================================
+    
+    ## The settings below will run the file merge multiple times with different
+    ## input settings
+    scaling_settings = [{"rescale":True,"pca":False,"whiten":False},
+                        {"rescale":True,"pca":True,"whiten":False},
+                        {"rescale":True,"pca":True,"whiten":True}]
+
+    run_many(inpath=input_path,
+             outpath=output_path,
              parameter_thresholds=parameter_thresholds,
-             rescale_data=True, 
-             use_pca=False, 
-             whiten=False,
+             scaling_settings=scaling_settings,
              plot_dists=False,
              write_file=True)
-    
+        
 if __name__ == '__main__':
     main()
