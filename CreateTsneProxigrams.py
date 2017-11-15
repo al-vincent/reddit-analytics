@@ -22,10 +22,14 @@ import numpy as np
 from scipy.spatial.distance import pdist, squareform
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
+from sys import exit
 
 ## ****************************************************************************
 ## * HELPER FUNCTIONS
 ## ****************************************************************************
+def get_input_files(path):
+    pass
+
 def get_knn(df, k):  
     """
     Calculate the k nearest neighbours for each point in df, using Eucildean 
@@ -190,19 +194,33 @@ def cut_datasets(n, df, tsne, names):
     tsne = tsne.head(n)
     names = names[0:n]
     return df, tsne, names
-    
-def main(testing=False, use_tsne_file=False):
+
+def create_proxigram(f_data, f_tsne, testing=False, use_tsne_file=False, 
+                     draw_proxigram=True):
     """
-    Main driver program. Read data from files and create proxigrams or 
-    scatterplots, as required.
-    """    
-    # input files
-    f_in = "../Data/Output/1509876761_MergedData_noPCA_Rescaled.txt"
-    f_tsne = "../Data/Output/MATLAB/MergedData_noPCA_Rescaled_p30_tSNE.csv"
+    Driver function to create a single proxigram from a datafile. Can either 
+    use t-SNE data generated externally and read in from a file, or use the 
+    sklearn t-SNE function.
     
-    # get datasets
-    df = pd.read_csv(f_in)
-    df.set_index('subreddit', inplace=True)
+    Paramteers:
+        - f_data: string, name of text file containing data to be read. (In 
+        this case, will use output from MergeData.py)
+        - f_tsne: string, name of text file containing corresponding t-SNE data
+        - testing: boolean, flag to indicate whether or not to use the full 
+        input dataset or a cut of it. Default: false.
+        - use_tsne_file: boolean, flag to indicate whether to take t-SNE coords
+        from an external file or generate using sklearn. Default: false.
+        - draw_proxigram: boolean, flag to indicate whether to draw the 
+        proxigram. If false, proxigram will instead be saved to file
+    """
+    
+    # get dataset
+    try:
+        df = pd.read_csv(f_data, index_col='subreddit')
+    except FileNotFoundError:
+        print("The file "+f_data+" was not found; exiting.")
+        exit(1)    
+#    df.set_index('subreddit', inplace=True)
     
     # get a list of subreddit names        
     names = df.index.values.tolist()    
@@ -217,11 +235,32 @@ def main(testing=False, use_tsne_file=False):
     # If testing=true, the program can be run with a small dataset of n lines
     if testing: df, tsne, names = cut_datasets(20, df, tsne, names)
     
+    # number of nearest neighbours to use for proxigrams
     k = 3
-    # get a list of subreddit names
+    # get subreddit knn, distances and the largest, smallest distances 
     knn, dists, d_min, d_max = get_knn(df, k)
-    proxi_dists = convert_knn_to_dict(dists, knn, names)    
+    # create an efficient, iterable structure for finding each subreddit's knn
+    proxi_dists = convert_knn_to_dict(dists, knn, names)  
+    # plot the proxigrams
+    # TODO: 
+    # - Add a flag to suppress displaying the proxigram if draw_proxigram==False
+    # - Save the file to .svg if draw_proxigram==False (will need a filename arg)
     plot_data(tsne, df, proxi_dists,d_min, d_max, plot_lines=True, names=names)
+    
+def main(testing=False, use_tsne_file=False):
+    """
+    Main driver program. Read data from files and create proxigrams or 
+    scatterplots, as required.
+    """    
+    # input files
+    f_in = "../Data/Output/1510732479_MergedData_noPCA_notWhitened_Rescaled.txt"
+    f_tsne = "../Data/Output/MATLAB/MergedData_noPCA_Rescaled_p30_tSNE.csv"
+    
+    create_proxigram(f_data=f_in, 
+                     f_tsne=f_tsne, 
+                     testing=False, 
+                     use_tsne_file=True, 
+                     draw_proxigram=True)
     
 if __name__ == '__main__':
     main()
