@@ -7,6 +7,8 @@ Description:    Program to merge output from several MapReduce programs.
                 Inputs can come as .tsv or .csv files (mainly .tsv), and will 
                 (*must!*) be of the form 
                 "subreddit", "attribute1", "attribute2",..."attributeN"
+                [i.e. the first attribute *MUST* be subreddit name, followed by
+                the other attributes sepearated by commas or tabs]
                 
                 Input files *must* also have a header line.
                 
@@ -275,9 +277,26 @@ class MergeData():
 ## * HELPER FUNCTIONS
 ## ****************************************************************************
 def generate_output_filename(use_pca=True, whiten=True, rescale=True):
+    """
+    Create a name for the output file based on the parameters used in the merge
+    and the time when the file was created. File will be a *.txt
     
+    Parameters:        
+        - use_pca: boolean, flag to indicate whether or not to apply principal
+            components analysis
+        - whiten: boolean, flag to indicate whether or not to whiten the data 
+            (only used if PCA is also applied)
+        - rescale_data: boolean, flag to indicate whether to use log rescaling
+    
+    Returns:
+        - a string giving the name of the output file.
+    """     
+    
+    # The base of the filename is "<epoch>_MergedData"
     base = str(int(time())) + "_MergedData"
 
+    # Concatenate a substring to base to indicate whether PCA and whitening are 
+    # being used
     if use_pca:
         base += "_PCA"
         if whiten:
@@ -287,11 +306,13 @@ def generate_output_filename(use_pca=True, whiten=True, rescale=True):
     else:
         base += "_noPCA_notWhitened"
     
+    # Concatenate a substring to base, to indicate whether the data has been 
+    # rescaled (using log scalings)
     if rescale:
         base += "_Rescaled"
     else:
         base += "_notRescaled"
-        
+    
     base += ".txt"
     
     return base
