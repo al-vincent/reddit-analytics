@@ -113,13 +113,13 @@ class CreateProxigram():
         Parameters:
             - tsne, dataframe of t-SNE (x,y) coords for each subreddit
             - df, dataframe of original subreddit feature values
-            - proxi-dists, dict-of-dicts holding knn and distances for subreddits
+            - proxi-dists, dict-of-dicts holding knn, distances per subreddit
             - d_min, minimum distance in feature space
             - d_max, maximum distance in feature space
-            - plot_lines, boolean, indicates whether to plot proxi lines. If False,
-                a normal scatterplot is plotted (MUCH quicker)
-            - plot_names, boolean, indicates whether to include subreddit names on 
-                plot (takes longer).                                                                     
+            - plot_lines, boolean, indicates whether to plot proxi lines. If 
+                False, a normal scatterplot is plotted (MUCH quicker)
+            - plot_names, boolean, indicates whether to include subreddit names 
+                on plot (takes longer, but helpful).                                                                     
         """
         # turn off interactive mode (only shows plots if plt.show() is used)
         plt.ioff()
@@ -298,8 +298,8 @@ def get_input_files(path):
         exit(2)
 
 
-def create_many_proxigrams(path, testing = False, use_tsne_file=False, 
-                           draw_proxigram=False):
+def create_many_proxigrams(path, testing=False, use_tsne_file=False, 
+                           draw_proxigram=False, plot_lines=True, k=3):
     ## TODO: may want a slightly more complicated structure to hold input and
     ## t-SNE filenames (rather than just two lists)? E.g.:
     ##  - a list of dicts with "data_file" : "tSNE_file"?
@@ -312,7 +312,17 @@ def create_many_proxigrams(path, testing = False, use_tsne_file=False,
         # the tSNE file *MUST* be in a tSNE subfolder in 'path', and tSNE files
         # *MUST* have the same name as the data file, but with '_tSNE' appended.
         f_tsne = path + "/tSNE/" + f[len(f)-4:] + "_tSNE.txt"
+        plot_name = path + "/images/" + f_tsne[len(f)-4:] + ".svg"
         
+        proxi = CreateProxigram(f_data=f,
+                                f_tsne=f_tsne,
+                                testing=testing, 
+                                use_tsne_file=use_tsne_file,
+                                draw_proxigram=draw_proxigram, 
+                                plot_lines=plot_lines, 
+                                plot_name=plot_name,
+                                k=k)
+        proxi.create_proxigram()
 
 def main():
     """
@@ -320,7 +330,7 @@ def main():
     scatterplots, as required.
     """    
     # set main path for reading data files and writing output
-    path = "../Data/Output/"
+    file_path = "../Data/Output/"
     # set run parameters
     testing = False
     use_tsne_file=True
@@ -329,24 +339,30 @@ def main():
     plot_name=None
     nearest_neighbours = 3
     
-    # input files
-    f_in = "../Data/Output/Experiment1/1510732479_MergedData_noPCA_notWhitened_Rescaled.txt"
-    f_tsne = "../Data/Output/MATLAB/MergedData_noPCA_Rescaled_p30_tSNE.csv"
+# =============================================================================
+#     # input files
+#     f_in = "../Data/Output/Experiment1/1510732479_MergedData_noPCA_notWhitened_Rescaled.txt"
+#     f_tsne = "../Data/Output/MATLAB/MergedData_noPCA_Rescaled_p30_tSNE.csv"
+#     
+#     # create single proxigram plot    
+#     proxi = CreateProxigram(f_data=f_in,
+#                             f_tsne=f_tsne,
+#                             testing=testing, 
+#                             use_tsne_file=use_tsne_file,
+#                             draw_proxigram=draw_proxigram, 
+#                             plot_lines=plot_lines, 
+#                             plot_name=plot_name,
+#                             k=nearest_neighbours)
+#     proxi.create_proxigram()
+# =============================================================================
     
-#    create_proxigram(f_data=f_in, 
-#                     f_tsne=f_tsne, 
-#                     testing=testing, 
-#                     use_tsne_file=use_tsne_file, 
-#                     draw_proxigram=draw_proxigram)
-    proxi = CreateProxigram(f_data=f_in,
-                            f_tsne=f_tsne,
-                            testing=testing, 
-                            use_tsne_file=use_tsne_file,
-                            draw_proxigram=draw_proxigram, 
-                            plot_lines=plot_lines, 
-                            plot_name=plot_name,
-                            k=nearest_neighbours)
-    proxi.create_proxigram()
+    # create multiple proxigram plots and save (don't display)
+    create_many_proxigrams(path=file_path, 
+                           testing=testing, 
+                           use_tsne_file=use_tsne_file, 
+                           draw_proxigram=draw_proxigram, 
+                           plot_lines=plot_lines, 
+                           k=nearest_neighbours)
     
 if __name__ == '__main__':
     main()
