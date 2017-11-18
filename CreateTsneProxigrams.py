@@ -28,7 +28,8 @@ from time import time
 
 class CreateProxigram():
     def __init__(self, f_data, f_tsne=None, testing=False, use_tsne_file=False, 
-                 draw_proxigram=True, plot_lines=True, plot_name=None, k=3):
+                 draw_proxigram=True, plot_lines=True, plot_name=None, 
+                 tsne_perplexity=15, k=3):
         self.f_data = f_data
         self.f_tsne = f_tsne
         self.testing = testing
@@ -36,6 +37,7 @@ class CreateProxigram():
         self.show_plot = draw_proxigram
         self.plot_lines = plot_lines
         self.plot_name = plot_name
+        self.perplexity = tsne_perplexity
         self.k = k
 
     def get_knn(self, df):  
@@ -195,7 +197,7 @@ class CreateProxigram():
                                      "x":tsne[:,0], "y":tsne[:,1]})
             else:
                 print("df and names are both required.")
-                exit(1)
+                exit(2)
         return tsne.set_index('subreddit')
     
     def cut_datasets(self, n, df, tsne, names):
@@ -241,7 +243,7 @@ class CreateProxigram():
             df = pd.read_csv(self.f_data, index_col='subreddit')
         except FileNotFoundError:
             print("The file "+self.f_data+" was not found; exiting.")
-            exit(1)    
+            exit(3)    
         
         # get a list of subreddit names        
         names = df.index.values.tolist()    
@@ -263,9 +265,6 @@ class CreateProxigram():
         proxi_dists = self.convert_knn_to_dict(dists, knn, names)  
         
         # plot the proxigrams
-        # TODO: 
-        # - Add a flag to suppress displaying the proxigram if draw_proxigram==False
-        # - Save the file to .svg if draw_proxigram==False (will need a filename arg)
         self.plot_data(tsne, df, proxi_dists, d_min, d_max, names=names)
     
 ## ****************************************************************************
@@ -279,6 +278,7 @@ def get_input_files(path):
     NOTE: assumes that all files in 'path' are useful input.
     """
     
+    # find all files in 'path' and store the filnames in the 'files' list
     files = []
     try:
         with scandir(path) as input_dir:            
@@ -287,40 +287,50 @@ def get_input_files(path):
                     files.append(entry.name)
     except FileNotFoundError:
         print("The directory " + path + " was not found")
-        exit(1)
+        exit(4)
     
+    # print names of files found to console
     if files:
         print(str(len(files)) + " files found:")
         for file in files: print("\t"+file)
         return files
     else:
         print("No files found at " + path + "; exiting")
-        exit(2)
-
+        exit(5)
 
 def create_many_proxigrams(path, testing=False, use_tsne_file=False, 
-                           draw_proxigram=False, plot_lines=True, k=3):
-    ## TODO: may want a slightly more complicated structure to hold input and
-    ## t-SNE filenames (rather than just two lists)? E.g.:
-    ##  - a list of dicts with "data_file" : "tSNE_file"?
-    ##  - a series of subfolders,for rescale, pca and whitened?
-    ##      --> "Experiment1",...,"ExperimentN" folders, with 3 files in each?
-    ## The aim is to automate this, so that I don't have to continually mess
-    ## about with changing hard-coded files :-s
+                           draw_proxigram=False, plot_lines=True, 
+                           perplexity=15, k=3):
+    """
+    Create a proxigram for each input file found in the 'path' directory. Default 
+    behaviour is to save each proxigram as a SVG file, and *not* show the 
+    proxigram on the screen. 
+    
+    NOTES: 
+        - If t-SNE data is to be read from a file, then filename *MUST* be the 
+        same as the data input but with '_tSNE.csv' appended.
+        E.g. if the data file is named a.txt, the t-SNE file must be a_tSNE.csv
+        - The name of the SVG file will be the same as the name of the t-SNE file,
+        but with an .svg file extension (rather than .csv). It will be saved in 
+        an 'Images' subfolder in 'path'.
+    """
+    # get list of files in 'path'
     files = get_input_files(path)
+    # iterate through each data input file
     for f in files:
-        # the tSNE file *MUST* be in a tSNE subfolder in 'path', and tSNE files
-        # *MUST* have the same name as the data file, but with '_tSNE' appended.
-        f_tsne = path + "/tSNE/" + f[len(f)-4:] + "_tSNE.txt"
-        plot_name = path + "/images/" + f_tsne[len(f)-4:] + ".svg"
-        
-        proxi = CreateProxigram(f_data=f,
-                                f_tsne=f_tsne,
+        # create relevant filenames from data input file
+        if use_tsne_file: 
+            f_tsne = f[:len(f)-4]+"_p"+str(perplexity)+"_tSNE.csv"
+        plot_name = path + "Images/" + f_tsne[:len(f)-4] + ".svg"
+        # create proxigram from data and t-SNE files
+        proxi = CreateProxigram(f_data=path+f,
+                                f_tsne=path+"TSNE/"+f_tsne,
                                 testing=testing, 
                                 use_tsne_file=use_tsne_file,
                                 draw_proxigram=draw_proxigram, 
                                 plot_lines=plot_lines, 
                                 plot_name=plot_name,
+                                tsne_perplexity=perplexity,
                                 k=k)
         proxi.create_proxigram()
 
@@ -330,13 +340,14 @@ def main():
     scatterplots, as required.
     """    
     # set main path for reading data files and writing output
-    file_path = "../Data/Output/"
+    file_path = "../Data/Output/Experiment1/"
     # set run parameters
     testing = False
     use_tsne_file=True
-    draw_proxigram=True
+    draw_proxigram=False
     plot_lines=True
     plot_name=None
+    tsne_perplexity = 30
     nearest_neighbours = 3
     
 # =============================================================================
@@ -362,6 +373,7 @@ def main():
                            use_tsne_file=use_tsne_file, 
                            draw_proxigram=draw_proxigram, 
                            plot_lines=plot_lines, 
+                           perplexity=tsne_perplexity,
                            k=nearest_neighbours)
     
 if __name__ == '__main__':
