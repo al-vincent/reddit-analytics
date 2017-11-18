@@ -295,6 +295,13 @@ def generate_output_filename(use_pca=True, whiten=True, rescale=True):
     # The base of the filename is "<epoch>_MergedData"
     base = str(int(time())) + "_MergedData"
 
+    # Concatenate a substring to base, to indicate whether the data has been 
+    # rescaled (using log scalings)
+    if rescale:
+        base += "_Rescaled"
+    else:
+        base += "_notRescaled"
+
     # Concatenate a substring to base to indicate whether PCA and whitening are 
     # being used
     if use_pca:
@@ -305,13 +312,6 @@ def generate_output_filename(use_pca=True, whiten=True, rescale=True):
             base += "_notWhitened"
     else:
         base += "_noPCA_notWhitened"
-    
-    # Concatenate a substring to base, to indicate whether the data has been 
-    # rescaled (using log scalings)
-    if rescale:
-        base += "_Rescaled"
-    else:
-        base += "_notRescaled"
     
     base += ".txt"
     
@@ -400,7 +400,7 @@ def main():
     """
     
     input_path = "../Data/Input/Processed/"
-    output_path = "../Data/Output/"
+    output_path = "../Data/Output/Experiment1/"
 
     parameter_thresholds = {'comment_count':100000, 'post_count':1000}    
 
