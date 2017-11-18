@@ -161,6 +161,7 @@ class CreateProxigram():
                 plt.savefig(self.plot_name)
             else:
                 plt.savefig(str(int(time())) + ".svg")
+            plt.close()
     
     def get_tsne(self, df=None, names=None, perplex=50, seed=1):
         """
@@ -180,8 +181,8 @@ class CreateProxigram():
         """
         
         tsne = None
-        # if there's a t-SNE filename, try to load the data. Print error if file 
-        # not found.
+        # if there's a t-SNE filename, try to load the data. Print error if 
+        # file not found.
         if self.f_tsne is not None:
             try:
                 tsne = pd.read_csv(self.f_tsne) 
@@ -316,12 +317,14 @@ def create_many_proxigrams(path, testing=False, use_tsne_file=False,
     """
     # get list of files in 'path'
     files = get_input_files(path)
+    
+    print("\nFiles written:")
     # iterate through each data input file
     for f in files:
         # create relevant filenames from data input file
         if use_tsne_file: 
             f_tsne = f[:len(f)-4]+"_p"+str(perplexity)+"_tSNE.csv"
-        plot_name = path + "Images/" + f_tsne[:len(f)-4] + ".svg"
+        plot_name = f_tsne[:len(f_tsne)-4] + ".svg"
         # create proxigram from data and t-SNE files
         proxi = CreateProxigram(f_data=path+f,
                                 f_tsne=path+"TSNE/"+f_tsne,
@@ -329,10 +332,11 @@ def create_many_proxigrams(path, testing=False, use_tsne_file=False,
                                 use_tsne_file=use_tsne_file,
                                 draw_proxigram=draw_proxigram, 
                                 plot_lines=plot_lines, 
-                                plot_name=plot_name,
+                                plot_name=path + "Images/" + plot_name,
                                 tsne_perplexity=perplexity,
                                 k=k)
         proxi.create_proxigram()
+        print("\t" + plot_name)
 
 def main():
     """
@@ -347,7 +351,7 @@ def main():
     draw_proxigram=False
     plot_lines=True
     plot_name=None
-    tsne_perplexity = 30
+    tsne_perplexity = 50
     nearest_neighbours = 3
     
 # =============================================================================
