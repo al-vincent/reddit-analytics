@@ -393,41 +393,40 @@ def run_many(inpath, outpath, parameter_thresholds, scaling_settings,
 ## ****************************************************************************
 ## * MAIN METHOD
 ## ****************************************************************************
-def main():
+def main(single_run=True):
     """
     Main driver for program. Set filenames and parameters, then call driver 
     function (either run_once() or run_many()).
     """
     
     input_path = "../Data/Input/Processed/"
-    output_path = "../Data/Output/Experiment1/"
+    output_path = "../Data/Output/Experiment2/"
 
     parameter_thresholds = {'comment_count':100000, 'post_count':1000}    
 
-## The settings below will run the file merge once
-# =============================================================================
-#     run_once(inpath=input_path, 
-#              outpath=output_path, 
-#              parameter_thresholds=parameter_thresholds,
-#              rescale_data=True, 
-#              use_pca=False, 
-#              whiten=False,
-#              plot_dists=False,
-#              write_file=True)
-# =============================================================================
+    if single_run:
+        ## The settings below will run the file merge once
+        run_once(inpath=input_path, 
+                 outpath=output_path, 
+                 parameter_thresholds=parameter_thresholds,
+                 rescale_data=True, 
+                 use_pca=False, 
+                 whiten=False,
+                 plot_dists=True,
+                 write_file=False)
+    else:
+        ## The settings below will run the file merge multiple times with different
+        ## input settings
+        scaling_settings = [{"rescale":True,"pca":False,"whiten":False},
+                            {"rescale":True,"pca":True,"whiten":False},
+                            {"rescale":True,"pca":True,"whiten":True}]
     
-    ## The settings below will run the file merge multiple times with different
-    ## input settings
-    scaling_settings = [{"rescale":True,"pca":False,"whiten":False},
-                        {"rescale":True,"pca":True,"whiten":False},
-                        {"rescale":True,"pca":True,"whiten":True}]
-
-    run_many(inpath=input_path,
-             outpath=output_path,
-             parameter_thresholds=parameter_thresholds,
-             scaling_settings=scaling_settings,
-             plot_dists=False,
-             write_file=True)
+        run_many(inpath=input_path,
+                 outpath=output_path,
+                 parameter_thresholds=parameter_thresholds,
+                 scaling_settings=scaling_settings,
+                 plot_dists=False,
+                 write_file=True)
         
 if __name__ == '__main__':
     main()
