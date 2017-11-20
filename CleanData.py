@@ -30,6 +30,9 @@ class FileInfo():
         self.keep_cols = {"AverageCommentCharacterCount.txt":"average_comment_character_count",
                           "AverageNsfwPosts.txt":"average_nsfw",
                           "AveragePostCharacterCount.txt":"average_post_character_count",
+                          # File below was generated from web scraping, not from
+                          # MapReduce, so included for completeness only.
+                          #"AverageSubscriberCount.txt":"average_subscriber_count",
                           "AverageURLs.txt":"average_num_urls",
                           "CommentsPerPost.txt":"comments_per_post_mean",
                           "CommentEntropy.txt":"comment_entropy",
