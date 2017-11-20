@@ -108,9 +108,9 @@ class CreateProxigram():
     
     def plot_data(self, tsne, df, proxi_dists, d_min, d_max, names=None):
         """
-        Plot the proxigram. Create a scattergraph using t-SNE points and subreddit
-        names, then plot arrows between each point and its knn. Colour the arrows
-        based on distance (in feature space, *not* t-SNE space).
+        Plot the proxigram. Create a scattergraph using t-SNE points and 
+        subreddit names, then plot arrows between each point and its knn. 
+        Colour arrows based on distance (in feature space, *not* t-SNE space).
         
         Parameters:
             - tsne, dataframe of t-SNE (x,y) coords for each subreddit
@@ -338,13 +338,12 @@ def create_many_proxigrams(path, testing=False, use_tsne_file=False,
         proxi.create_proxigram()
         print("\t" + plot_name)
 
-def main():
+def main(single_run=False):
     """
     Main driver program. Read data from files and create proxigrams or 
     scatterplots, as required.
     """    
-    # set main path for reading data files and writing output
-    file_path = "../Data/Output/Experiment1/"
+    
     # set run parameters
     testing = False
     use_tsne_file=True
@@ -354,31 +353,34 @@ def main():
     tsne_perplexity = 50
     nearest_neighbours = 3
     
-# =============================================================================
-#     # input files
-#     f_in = "../Data/Output/Experiment1/1510732479_MergedData_noPCA_notWhitened_Rescaled.txt"
-#     f_tsne = "../Data/Output/MATLAB/MergedData_noPCA_Rescaled_p30_tSNE.csv"
-#     
-#     # create single proxigram plot    
-#     proxi = CreateProxigram(f_data=f_in,
-#                             f_tsne=f_tsne,
-#                             testing=testing, 
-#                             use_tsne_file=use_tsne_file,
-#                             draw_proxigram=draw_proxigram, 
-#                             plot_lines=plot_lines, 
-#                             plot_name=plot_name,
-#                             k=nearest_neighbours)
-#     proxi.create_proxigram()
-# =============================================================================
     
-    # create multiple proxigram plots and save (don't display)
-    create_many_proxigrams(path=file_path, 
-                           testing=testing, 
-                           use_tsne_file=use_tsne_file, 
-                           draw_proxigram=draw_proxigram, 
-                           plot_lines=plot_lines, 
-                           perplexity=tsne_perplexity,
-                           k=nearest_neighbours)
+    if single_run:
+        # input files
+        f_in = "../Data/Output/Experiment1/1510732479_MergedData_noPCA_notWhitened_Rescaled.txt"
+        f_tsne = "../Data/Output/MATLAB/MergedData_noPCA_Rescaled_p30_tSNE.csv"
+        
+        # create single proxigram plot    
+        proxi = CreateProxigram(f_data=f_in,
+                                f_tsne=f_tsne,
+                                testing=testing, 
+                                use_tsne_file=use_tsne_file,
+                                draw_proxigram=draw_proxigram, 
+                                plot_lines=plot_lines, 
+                                plot_name=plot_name,
+                                tsne_perplexity=tsne_perplexity,
+                                k=nearest_neighbours)
+        proxi.create_proxigram()
+    else:
+        # set main path for reading data files and writing output
+        file_path = "../Data/Output/Experiment1/"
+        # create multiple proxigram plots and save (don't display)
+        create_many_proxigrams(path=file_path, 
+                               testing=testing, 
+                               use_tsne_file=use_tsne_file, 
+                               draw_proxigram=draw_proxigram, 
+                               plot_lines=plot_lines, 
+                               perplexity=tsne_perplexity,
+                               k=nearest_neighbours)
     
 if __name__ == '__main__':
     main()
