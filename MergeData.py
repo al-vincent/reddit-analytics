@@ -123,7 +123,7 @@ class MergeData():
         
         return df
     
-    def rescale_data(self, df):
+    def rescale_data_log(self, df):
         """
         Rescale data for specific attributes. Use either a log scale, or 
         centre the data on 0 and add a small value before 
@@ -152,6 +152,29 @@ class MergeData():
         OFFSET = 0.001
         for col in log_offset_cols:
             df[col] = log(df[col] + abs(df[col].min()) + OFFSET)
+        
+        return df
+    
+    def rescale_data_zero_to_one(self, df):
+        """
+        Rescale data in each field so that it's on the range [0,1], by:
+            (1) adding the abs value of the attribute minimum;
+            (2) dividing by the abs value of the attribute maximum.
+        
+        Can be applied either with rescale_data_log (e.g. afterwards using the
+        log rescaling to 'stretch' the dataset), or instead of.
+        
+        If applied to an attribute that is already on [0,1], *should* have no 
+        effect.
+        """
+        
+        for col in df.columns.values:
+            try:
+                df[col] += abs(df[col].min())
+                df[col] /= abs(df[col].max())
+            except TypeError as e:
+                print("Attribute: " + col)
+                print(e)
         
         return df
     
@@ -215,7 +238,7 @@ class MergeData():
         else:
             print('{:20s} {:>7}'.format("Output file:", str(save_file)))
             
-    def merge_data(self, thresholds=None, rescale=False, use_pca=False, 
+    def merge_data(self, thresholds=None, rescale=None, use_pca=False, 
                    pca_whiten=False, plot_dists=False, show_params=True, 
                    write_file=True):
         """
@@ -229,9 +252,13 @@ class MergeData():
         
         Parameters:
             - thresholds, dict of form {"attribute" : filter_value}
-            - rescale, boolean, indicator on whether data has been rescaled
-            - use_pca, boolean, indicator on whether data has been PCA'd
-            - pca_whiten, boolean, indicator on whether data has been whitened
+            - rescale, string, indicator on if data should be rescaled, and how
+                > "None"    = don't apply any rescaling
+                > "log"     = rescale using log or adjusted log scale
+                > "zero     = rescale s.t. values are all on  [0,1]
+                > "logZero" = log scale, then normalise s.t. vals on  [0,1]
+            - use_pca, boolean, indicator on whether data should be PCA'd
+            - pca_whiten, boolean, indicator on whether data should be whitened
             - plot_dists, boolean, indicator on whether data should be plotted
             - show_params, boolean, indicator on whether data should be printed
             - write_file, boolean, indicator ref saving data to file
@@ -250,7 +277,11 @@ class MergeData():
         if thresholds is not None: df = self.set_threshold(df, thresholds)            
         
         # apply log rescaling to the dataframe
-        if rescale: df = self.rescale_data(df)
+        if rescale is not None:
+            if rescale == "log" or rescale == "both":
+                df = self.rescale_data_log(df)
+            if rescale == "zero" or rescale == "logZero":
+                df = self.rescale_data_zero_to_one(df)
         
         # set the index to be the 'subreddit' column
         df.set_index("subreddit", inplace=True)        
@@ -297,8 +328,8 @@ def generate_output_filename(use_pca=True, whiten=True, rescale=True):
 
     # Concatenate a substring to base, to indicate whether the data has been 
     # rescaled (using log scalings)
-    if rescale:
-        base += "_Rescaled"
+    if rescale is not None:
+        base += "_" + rescale + "Rescale"
     else:
         base += "_notRescaled"
 
@@ -393,7 +424,7 @@ def run_many(inpath, outpath, parameter_thresholds, scaling_settings,
 ## ****************************************************************************
 ## * MAIN METHOD
 ## ****************************************************************************
-def main(single_run=True):
+def main(single_run=False):
     """
     Main driver for program. Set filenames and parameters, then call driver 
     function (either run_once() or run_many()).
@@ -409,7 +440,7 @@ def main(single_run=True):
         run_once(inpath=input_path, 
                  outpath=output_path, 
                  parameter_thresholds=parameter_thresholds,
-                 rescale_data=True, 
+                 rescale_data="logZero", 
                  use_pca=False, 
                  whiten=False,
                  plot_dists=True,
@@ -417,9 +448,9 @@ def main(single_run=True):
     else:
         ## The settings below will run the file merge multiple times with different
         ## input settings
-        scaling_settings = [{"rescale":True,"pca":False,"whiten":False},
-                            {"rescale":True,"pca":True,"whiten":False},
-                            {"rescale":True,"pca":True,"whiten":True}]
+        scaling_settings = [{"rescale":"logZero","pca":False,"whiten":False},
+                            {"rescale":"logZero","pca":True,"whiten":False},
+                            {"rescale":"logZero","pca":True,"whiten":True}]
     
         run_many(inpath=input_path,
                  outpath=output_path,
