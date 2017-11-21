@@ -277,8 +277,9 @@ class MergeData():
         if thresholds is not None: df = self.set_threshold(df, thresholds)            
         
         # apply log rescaling to the dataframe
+        assert rescale in [None, "log", "zero", "logZero"]
         if rescale is not None:
-            if rescale == "log" or rescale == "both":
+            if rescale == "log" or rescale == "logZero":
                 df = self.rescale_data_log(df)
             if rescale == "zero" or rescale == "logZero":
                 df = self.rescale_data_zero_to_one(df)
@@ -424,7 +425,7 @@ def run_many(inpath, outpath, parameter_thresholds, scaling_settings,
 ## ****************************************************************************
 ## * MAIN METHOD
 ## ****************************************************************************
-def main(single_run=False):
+def main(single_run=True):
     """
     Main driver for program. Set filenames and parameters, then call driver 
     function (either run_once() or run_many()).
