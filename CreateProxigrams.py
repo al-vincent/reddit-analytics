@@ -350,10 +350,10 @@ def main(single_run=False):
     draw_proxigram=False
     plot_lines=True
     plot_name=None
-    tsne_perplexity = 50
+    tsne_perplexity = 15
     nearest_neighbours = 3
     
-    
+    # run the embedding    
     if single_run:
         # input files
         f_in = "../Data/Output/Experiment1/1510732479_MergedData_noPCA_notWhitened_Rescaled.txt"
@@ -372,7 +372,7 @@ def main(single_run=False):
         proxi.create_proxigram()
     else:
         # set main path for reading data files and writing output
-        file_path = "../Data/Output/Experiment1/"
+        file_path = "../Data/Output/Experiment2/"
         # create multiple proxigram plots and save (don't display)
         create_many_proxigrams(path=file_path, 
                                testing=testing, 
