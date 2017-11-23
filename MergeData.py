@@ -308,7 +308,7 @@ class MergeData():
 ## ****************************************************************************
 ## * HELPER FUNCTIONS
 ## ****************************************************************************
-def generate_output_filename(use_pca=True, whiten=True, rescale=True):
+def generate_output_filename(use_pca=True, whiten=True, rescale=None):
     """
     Create a name for the output file based on the parameters used in the merge
     and the time when the file was created. File will be a *.txt
@@ -318,7 +318,8 @@ def generate_output_filename(use_pca=True, whiten=True, rescale=True):
             components analysis
         - whiten: boolean, flag to indicate whether or not to whiten the data 
             (only used if PCA is also applied)
-        - rescale_data: boolean, flag to indicate whether to use log rescaling
+        - rescale_data: string, flag indicating whether to rescale data and how
+            (options: None, "log", "zero", "logZero")
     
     Returns:
         - a string giving the name of the output file.
@@ -363,7 +364,8 @@ def run_once(inpath, outpath, parameter_thresholds, rescale_data, use_pca,
         - parameter_thresholds: dict, holds minimum values for comment_count 
             and post_count (i.e. only subreddits with more comments than 
             comment_count AND more posts than post_count will be retained)
-        - rescale_data: boolean, flag to indicate whether to use log rescaling
+        - rescale_data: string, flag indicating whether to rescale data and how
+            (options: None, "log", "zero", "logZero")
         - use_pca: boolean, flag to indicate whether or not to apply principal
             components analysis
         - whiten: boolean, flag to indicate whether or not to whiten the data 
@@ -402,8 +404,8 @@ def run_many(inpath, outpath, parameter_thresholds, scaling_settings,
             and post_count (i.e. only subreddits with more comments than 
             comment_count AND more posts than post_count will be retained)
         - scaling_settings: list of dicts, in format
-        [{"rescale":<boolean>, "pca":<boolean>, "whiten":<boolean>},
-         {"rescale":<boolean>, "pca":<boolean>, "whiten":<boolean>},
+        [{"rescale":<string>, "pca":<boolean>, "whiten":<boolean>},
+         {"rescale":<string>, "pca":<boolean>, "whiten":<boolean>},
          ...etc.]
         - plot_dists: boolean, flag to indicate whether or not to plot the 
             attribute distributions 
@@ -425,7 +427,7 @@ def run_many(inpath, outpath, parameter_thresholds, scaling_settings,
 ## ****************************************************************************
 ## * MAIN METHOD
 ## ****************************************************************************
-def main(single_run=True):
+def main(single_run=False):
     """
     Main driver for program. Set filenames and parameters, then call driver 
     function (either run_once() or run_many()).
