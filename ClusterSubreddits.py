@@ -63,7 +63,7 @@ class Clustering():
         self.f_tsne = f_tsne
         self.data = self.read_data(f_in)
             
-    def read_data(self, f_in):
+    def read_data(self, f):
         """
         Read data from file (assumes .csv format).
         
@@ -74,10 +74,10 @@ class Clustering():
             - pandas dataframe containing the data, with subreddit as index
         """
         try:
-            df = pd.read_csv(f_in)
+            df = pd.read_csv(f)
             return df.set_index('subreddit')
         except FileNotFoundError:
-            print("The file " +self.f_in + " was not found")
+            print("The file " + f + " was not found")
             exit(1)
     
     def hierarchical_clustering(self, method):
@@ -325,6 +325,8 @@ class Clustering():
         plt.title(new_col + " clustering overlaid onto t-SNE coordinates, " + 
                   "producing " + str(len(set(df[new_col]))) + " clusters")
         
+        plt.show()
+        
     def run_clusters(self, gmm_cmpts=10, prior=1e-3,         
                      cut_height=None, linkage='ward',
                      save_hier=True, save_dpgmm=True, save_dbscan=True,
@@ -389,20 +391,23 @@ def main():
     to console and then runs models.    
     """
     # cluster parameters
-    gmm_cmpts = 50
-    gmm_prior = 1e3
-    cut_ht = 6
+    gmm_cmpts = 30
+    gmm_prior = 0.01
+    cut_ht = 20
     link = 'ward'
-    d_type = "PCA_Whitened_Rescaled"
+    d_type = "1511250908_MergedData_logZeroRescale_PCA_Whitened"
+    perplexity = 15
     
     # input files
-    infile = "../Data/Output/MergedData_"+d_type+".txt"
-    tsne_file = "../Data/Output/MATLAB/MergedData_"+d_type+"_p30_tSNE 1.csv"
+    path = "../Data/Output/Experiment2/"
+    infile = path + d_type + ".txt"
+    tsne_file = path + "TSNE/" + d_type+"_p"+str(perplexity)+"_tSNE.csv"
+    
     # output files
-    dendrogram_file = "../Images/dendrogram.svg"     
-    h_clusters_file = "../Data/Output/agglom/h_clusters_"+d_type+"_d"+str(cut_ht)+"_"+link+".csv"
-    gmm_clusters_file = "../Data/Output/dp_gmm/dpgmm_clusters_"+d_type+"_c"+str(gmm_cmpts)+".csv"
-    dbscan_clusters_file = "../Data/Output/dbscan/dbscan_"+d_type+"_clusters.csv"
+    dendrogram_file = path + "Images/"+d_type+"_dendrogram.svg"     
+    h_clusters_file = path+"AGGLOM/h_clusters_"+d_type+"_d"+str(cut_ht)+"_"+link+".csv"
+    gmm_clusters_file = path+"DP_GMM/dpgmm_clusters_"+d_type+"_c"+str(gmm_cmpts)+".csv"
+    dbscan_clusters_file = path+"DBSCAN/dbscan_"+d_type+"_clusters.csv"
     
     # print info to console
     print("\nModel run info\n--------------")
@@ -427,11 +432,11 @@ def main():
                        cut_height=cut_ht,
                        linkage=link, 
                        save_hier=False, 
-                       save_dpgmm=False,
+                       save_dpgmm=True,
                        save_dbscan=False,
                        plot_dendrogram=False,
                        plot_hclust_overlay=False, 
-                       plot_dpgmm_overlay=True)
+                       plot_dpgmm_overlay=False)
     
 if __name__ == '__main__':
     main()
