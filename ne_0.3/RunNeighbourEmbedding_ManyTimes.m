@@ -13,7 +13,7 @@ for ii = 1:length(folderInfo)
 	for jj = [15, 30, 50]
 		% set the random number seed (repeatability)
 		rng(1);
-		neigbourEmbedding_NoGraphics(path, folderInfo(ii).name, jj);
+		neigbourEmbedding_NoGraphics(path, folderInfo(ii).name, jj, 'tSNE'); % 'wt_tSNE'
 		fprintf("*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\n")
 		fprintf("Input file %s completed\n", folderInfo(ii).name);
 		fprintf("*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\n\n")
@@ -21,7 +21,7 @@ for ii = 1:length(folderInfo)
 end
 
 
-function neigbourEmbedding_NoGraphics(path, f_in, perplexity)
+function neigbourEmbedding_NoGraphics(path, f_in, perplexity, type)
 	% read the input data to a matlab table
 	merged = readtable(strcat(path, f_in));
 
@@ -39,16 +39,19 @@ function neigbourEmbedding_NoGraphics(path, f_in, perplexity)
 	P = sparse(x2p(X, u));
 
 	% calculate the algorithm output values
-	Y_tsne = tsne_p(P);     % t-distributed SNE
-	%_wtsne = wtsne_p(P);   % weighted t-SNE
+	if strcmp(type, 'tSNE')
+		Y = tsne_p(P);     % normal t-SNE
+	elseif strcmp(type, 'wt_tSNE')
+		Y = wtsne_p(P);   % weighted t-SNE
+	end
 
 	% create table for output
 	names = merged.Properties.RowNames;
-	T = table(names, Y_tsne(:,1),Y_tsne(:,2)); 
+	T = table(names, Y(:,1),Y(:,2)); 
 	T.Properties.VariableNames = {'subreddit' 'x' 'y'};
 
 	% save output to file
-	f_out = strcat(path,'TSNE/',extractBefore(f_in,'.'),'_p',int2str(u),'_tSNE.csv');
+	f_out = strcat(path,'TSNE/',extractBefore(f_in,'.'),'_p',int2str(u),'_',type,'.csv');
 	writetable(T, f_out);
 end
 
