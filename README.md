@@ -17,8 +17,7 @@ The aim of the work was to investigate whether individual subreddits could be gr
 The project is quite old, and was created when I didn't have much understanding of some basic good practice. For example:
 - There's no `requirements.txt` or `environment.yml` file, so it would be very challenging to run the code in its current state
 - There are no tests (of any sort)
-- The directory structure is almost nonexistent
-- The original data is not included in the repo (even as a sample), nor is the processed data
+- The original data is not included in the repo (as a sample), so it may be challenging to reconstruct the results
 
 ## Why it's useful
 The results and outputs of the work showed that there do seem to be underpinning similarities between subreddits related to the same themes. For example, plotting proxigrams of subreddits showed 'intuitive' clusters of subreddits all linked to sports teams (often in different languages, and different types of sport); gaming; cities and countries; etc. 
